@@ -23,6 +23,7 @@
     "noFallthroughCasesInSwitch": true,
     "types": ["node"],
     "paths": {
+      "@api-config/*": ["./src/api-config/*"],
       "@health/*": ["./src/health/*"]
     }
   },
