@@ -54,6 +54,6 @@
   },
   "lint-staged": {
     "*": "prettier --write --ignore-unknown",
-    "*.{ts}": "eslint --fix --no-warn-ignored"
+    "*.ts": "eslint --fix --no-warn-ignored"
   }
 }
