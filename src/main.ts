@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core'
 import morgan from 'morgan'
 
 import { ApiConfigService } from '@api-config/api-config.service'
+
 import { AppModule } from './app.module'
 
 async function bootstrap(): Promise<void> {
