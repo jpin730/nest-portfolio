@@ -4,5 +4,6 @@
     "source.organizeImports": "always"
   },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
+  "material-icon-theme.activeIconPack": "nest"
 }
