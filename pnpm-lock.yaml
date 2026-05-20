@@ -29,6 +29,9 @@ importers:
       class-validator:
         specifier: 0.15.1
         version: 0.15.1
+      dotenv:
+        specifier: 17.4.2
+        version: 17.4.2
       morgan:
         specifier: 1.10.1
         version: 1.10.1
@@ -44,6 +47,9 @@ importers:
       typeorm:
         specifier: 0.3.29
         version: 0.3.29(pg@8.21.0)(ts-node@10.9.2(@types/node@24.12.4)(typescript@5.9.3))
+      typeorm-naming-strategies:
+        specifier: 4.1.0
+        version: 4.1.0(typeorm@0.3.29(pg@8.21.0)(ts-node@10.9.2(@types/node@24.12.4)(typescript@5.9.3)))
     devDependencies:
       '@eslint/eslintrc':
         specifier: 3.3.5
@@ -1010,6 +1016,10 @@ packages:
 
   dotenv@17.4.1:
     resolution: {integrity: sha512-k8DaKGP6r1G30Lx8V4+pCsLzKr8vLmV2paqEj1Y55GdAgJuIqpRp5FfajGF8KtwMxCz9qJc6wUIJnm053d/WCw==}
+    engines: {node: '>=12'}
+
+  dotenv@17.4.2:
+    resolution: {integrity: sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw==}
     engines: {node: '>=12'}
 
   dunder-proto@1.0.1:
@@ -2154,6 +2164,11 @@ packages:
 
   typedarray@0.0.6:
     resolution: {integrity: sha512-/aCDEGatGvZ2BIk+HmLf4ifCJFwvKFNb9/JeZPMulfgFracn9QFcAf5GO8B/mweUjSoblS5In0cWhqpfs/5PQA==}
+
+  typeorm-naming-strategies@4.1.0:
+    resolution: {integrity: sha512-vPekJXzZOTZrdDvTl1YoM+w+sUIfQHG4kZTpbFYoTsufyv9NIBRe4Q+PdzhEAFA2std3D9LZHEb1EjE9zhRpiQ==}
+    peerDependencies:
+      typeorm: ^0.2.0 || ^0.3.0
 
   typeorm@0.3.29:
     resolution: {integrity: sha512-wwPEX/df4l72gCmOsrs0otJZYLGA9lLQkUZCkukbsymEycV4zXv2KM7wU7v2r8L01TaCgY9ApSSqHQWBOUhEoQ==}
@@ -3350,6 +3365,8 @@ snapshots:
 
   dotenv@17.4.1: {}
 
+  dotenv@17.4.2: {}
+
   dunder-proto@1.0.1:
     dependencies:
       call-bind-apply-helpers: 1.0.2
@@ -4463,6 +4480,10 @@ snapshots:
       is-typed-array: 1.1.15
 
   typedarray@0.0.6: {}
+
+  typeorm-naming-strategies@4.1.0(typeorm@0.3.29(pg@8.21.0)(ts-node@10.9.2(@types/node@24.12.4)(typescript@5.9.3))):
+    dependencies:
+      typeorm: 0.3.29(pg@8.21.0)(ts-node@10.9.2(@types/node@24.12.4)(typescript@5.9.3))
 
   typeorm@0.3.29(pg@8.21.0)(ts-node@10.9.2(@types/node@24.12.4)(typescript@5.9.3)):
     dependencies:

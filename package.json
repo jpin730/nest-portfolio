@@ -12,6 +12,9 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
+    "typeorm:config": "typeorm-ts-node-commonjs -d src/database/data-source.ts",
+    "migration:generate": "pnpm typeorm:config migration:generate --pretty src/database/migrations/migration && eslint --fix src/database/migrations/*.ts",
+    "migration:run": "pnpm typeorm:config migration:run",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "prepare": "husky"
   },
@@ -23,11 +26,13 @@
     "@nestjs/typeorm": "11.0.1",
     "class-transformer": "0.5.1",
     "class-validator": "0.15.1",
+    "dotenv": "17.4.2",
     "morgan": "1.10.1",
     "pg": "8.21.0",
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8.2",
-    "typeorm": "0.3.29"
+    "typeorm": "0.3.29",
+    "typeorm-naming-strategies": "4.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "3.3.5",
