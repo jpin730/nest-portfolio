@@ -1,12 +1,8 @@
 import { ValueTransformer } from 'typeorm'
 
+import { toTrim } from '@common/utils/to-trim'
+
 export const TrimTransformer: ValueTransformer = {
-  to: (value: unknown) => {
-    if (typeof value !== 'string') {
-      return value
-    }
-    const trimmed = value.trim()
-    return trimmed === '' ? null : trimmed
-  },
+  to: toTrim,
   from: (value: unknown) => value,
 }
