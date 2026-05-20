@@ -1,29 +1,39 @@
-import { IsNumber, IsString, Max, Min, MinLength } from 'class-validator'
+import { Transform, TransformFnParams } from 'class-transformer'
+import { IsInt, IsString, Max, Min, MinLength } from 'class-validator'
+
+const toNumber = ({ value }: TransformFnParams): unknown => {
+  if (!value) {
+    return value as unknown
+  }
+  return Number(value)
+}
 
 export class EnvironmentVariables {
-  @IsNumber()
+  @Transform(toNumber)
+  @IsInt()
   @Min(0)
   @Max(65535)
-  PORT!: number
+  PORT: number
 
   @IsString()
   @MinLength(1)
-  DB_HOST!: string
+  DB_HOST: string
 
-  @IsNumber()
+  @Transform(toNumber)
+  @IsInt()
   @Min(0)
   @Max(65535)
-  DB_PORT!: number
+  DB_PORT: number
 
   @IsString()
   @MinLength(1)
-  DB_NAME!: string
+  DB_NAME: string
 
   @IsString()
   @MinLength(1)
-  DB_USER!: string
+  DB_USER: string
 
   @IsString()
   @MinLength(1)
-  DB_PASS!: string
+  DB_PASS: string
 }
