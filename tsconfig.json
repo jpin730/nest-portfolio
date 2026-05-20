@@ -23,6 +23,7 @@
     "noFallthroughCasesInSwitch": true,
     "paths": {
       "@api-config/*": ["./src/api-config/*"],
+      "@auth/*": ["./src/auth/*"],
       "@common/*": ["./src/common/*"],
       "@database/*": ["./src/database/*"],
       "@health/*": ["./src/health/*"]
