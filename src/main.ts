@@ -1,4 +1,3 @@
-import { Logger } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import morgan from 'morgan'
 
@@ -11,11 +10,8 @@ async function bootstrap(): Promise<void> {
 
   app.use(morgan('tiny'))
 
-  const logger = new Logger('Bootstrap')
   const apiConfigService = app.get(ApiConfigService)
-
   const port = apiConfigService.port
-  logger.log(`Listening on port ${port}`)
   await app.listen(port)
 }
 void bootstrap()
