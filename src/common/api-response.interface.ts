@@ -1,4 +1,4 @@
 export interface ApiResponse {
-  message?: string
+  message?: string | string[]
   data?: unknown
 }
