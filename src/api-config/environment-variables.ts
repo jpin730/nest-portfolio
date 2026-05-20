@@ -1,5 +1,5 @@
 import { Transform, TransformFnParams } from 'class-transformer'
-import { IsInt, IsString, Max, Min, MinLength } from 'class-validator'
+import { IsInt, IsNotEmpty, IsString, Max, Min } from 'class-validator'
 
 const toNumber = ({ value }: TransformFnParams): unknown => {
   if (!value) {
@@ -16,7 +16,7 @@ export class EnvironmentVariables {
   PORT: number
 
   @IsString()
-  @MinLength(1)
+  @IsNotEmpty()
   DB_HOST: string
 
   @Transform(toNumber)
@@ -26,14 +26,14 @@ export class EnvironmentVariables {
   DB_PORT: number
 
   @IsString()
-  @MinLength(1)
+  @IsNotEmpty()
   DB_NAME: string
 
   @IsString()
-  @MinLength(1)
+  @IsNotEmpty()
   DB_USER: string
 
   @IsString()
-  @MinLength(1)
+  @IsNotEmpty()
   DB_PASS: string
 }
