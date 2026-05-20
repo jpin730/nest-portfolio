@@ -1,11 +1,7 @@
 import { Module } from '@nestjs/common'
-import { ConfigModule } from '@nestjs/config'
-import { TypeOrmModule } from '@nestjs/typeorm'
 
 import { ApiConfigModule } from '@api-config/api-config.module'
-
-import { validate } from '@api-config/validate'
-import { DataSourceConfig } from '@database/data-source'
+import { DatabaseModule } from '@database/database.module'
 
 import { HealthModule } from '@health/health.module'
 
@@ -14,13 +10,8 @@ import { GLOBAL_RESPONSE_INTERCEPTOR_PROVIDER } from '@common/global-response.in
 
 @Module({
   imports: [
-    // Configs & Database
-    ConfigModule.forRoot({ validate }),
     ApiConfigModule,
-    TypeOrmModule.forRoot({
-      ...DataSourceConfig,
-      logging: false,
-    }),
+    DatabaseModule,
 
     // Features
     HealthModule,
