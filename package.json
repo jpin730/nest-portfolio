@@ -12,7 +12,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
-    "typeorm:config": "typeorm-ts-node-commonjs -d src/database/data-source.ts",
+    "typeorm:config": "tsx -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d src/database/data-source.ts",
     "migration:generate": "pnpm typeorm:config migration:generate --pretty src/database/migrations/migration && eslint --fix src/database/migrations/*.ts",
     "migration:run": "pnpm typeorm:config migration:run",
     "migration:revert": "pnpm typeorm:config migration:revert",
@@ -54,6 +54,7 @@
     "ts-loader": "9.5.7",
     "ts-node": "10.9.2",
     "tsconfig-paths": "4.2.0",
+    "tsx": "4.22.3",
     "typescript": "5.9.3",
     "typescript-eslint": "8.59.3"
   },

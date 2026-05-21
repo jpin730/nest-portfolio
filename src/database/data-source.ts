@@ -2,7 +2,7 @@ import { config } from 'dotenv'
 import { DataSource, DataSourceOptions } from 'typeorm'
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies'
 
-import { validate } from '../api-config/validate'
+import { validate } from '@api-config/validate'
 
 config()
 
@@ -20,7 +20,7 @@ export const DataSourceConfig: DataSourceOptions = {
     channelBinding: 'require',
   },
   synchronize: false,
-  entities: [__dirname + '/entities/*.entity.ts'],
+  entities: [__dirname + '/entities/*.entity.{ts,js}'],
   migrations: [__dirname + '/migrations/*.ts'],
   namingStrategy: new SnakeNamingStrategy(),
   logging: true,
