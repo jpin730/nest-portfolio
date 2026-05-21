@@ -1,10 +1,11 @@
+import { PickType } from '@nestjs/mapped-types'
 import { Transform } from 'class-transformer'
 import { IsInt, IsNotEmpty, IsString, Max, Min } from 'class-validator'
 
-import { toNumber } from '@common/utils/to-number'
+import { numberTransform } from '@common/transforms/number.transform'
 
 export class EnvironmentVariables {
-  @Transform(toNumber)
+  @Transform(numberTransform)
   @IsInt()
   @Min(0)
   @Max(65535)
@@ -14,7 +15,7 @@ export class EnvironmentVariables {
   @IsNotEmpty()
   DB_HOST: string
 
-  @Transform(toNumber)
+  @Transform(numberTransform)
   @IsInt()
   @Min(0)
   @Max(65535)
@@ -31,4 +32,18 @@ export class EnvironmentVariables {
   @IsString()
   @IsNotEmpty()
   DB_PASS: string
+}
+
+export class MigrationEnvironmentVariables extends PickType(EnvironmentVariables, [
+  'DB_HOST',
+  'DB_PORT',
+  'DB_NAME',
+] as const) {
+  @IsString()
+  @IsNotEmpty()
+  DB_MIG_USER: string
+
+  @IsString()
+  @IsNotEmpty()
+  DB_MIG_PASS: string
 }

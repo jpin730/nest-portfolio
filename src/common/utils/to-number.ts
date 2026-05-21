@@ -1,8 +1,6 @@
-import { TransformFnParams } from 'class-transformer'
-
-export const toNumber = ({ value }: TransformFnParams): unknown => {
+export const toNumber = (value: unknown): unknown => {
   if (!value) {
-    return value as unknown
+    return value
   }
   return Number(value)
 }

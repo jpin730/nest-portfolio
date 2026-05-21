@@ -2,11 +2,12 @@ import { config } from 'dotenv'
 import { DataSource, DataSourceOptions } from 'typeorm'
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies'
 
-import { validate } from '@api-config/validate'
+import { validate, validateMigration } from '@api-config/validate'
 
 config()
 
-const env = validate(process.env)
+const isMigration = process.env.MIGRATION === 'true'
+const env = isMigration ? validateMigration(process.env) : validate(process.env)
 
 export const DataSourceConfig: DataSourceOptions = {
   type: 'postgres',
