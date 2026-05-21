@@ -8,12 +8,13 @@ import { BaseEntity } from './base.entity'
 @Entity({ name: 'users' })
 export class UserEntity extends BaseEntity {
   @Column({
-    type: 'text',
+    type: 'varchar',
+    length: 255,
     unique: true,
     transformer: composeTransformers(TrimTransformer, LowercaseTransformer),
   })
   email: string
 
-  @Column({ type: 'text' })
+  @Column({ type: 'varchar', length: 255 })
   password: string
 }
