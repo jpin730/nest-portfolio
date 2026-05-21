@@ -1,12 +1,7 @@
-import { Transform, TransformFnParams } from 'class-transformer'
+import { Transform } from 'class-transformer'
 import { IsInt, IsNotEmpty, IsString, Max, Min } from 'class-validator'
 
-const toNumber = ({ value }: TransformFnParams): unknown => {
-  if (!value) {
-    return value as unknown
-  }
-  return Number(value)
-}
+import { toNumber } from '@common/utils/to-number'
 
 export class EnvironmentVariables {
   @Transform(toNumber)
