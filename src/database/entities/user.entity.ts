@@ -15,6 +15,10 @@ export class UserEntity extends BaseEntity {
   })
   email: string
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({
+    type: 'varchar',
+    length: 60,
+    transformer: TrimTransformer,
+  })
   password: string
 }
