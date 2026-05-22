@@ -8,6 +8,7 @@ import {
   Logger,
 } from '@nestjs/common'
 import { APP_FILTER, HttpAdapterHost } from '@nestjs/core'
+import { TypeORMError } from 'typeorm'
 
 import { ApiResponse } from './api-response.interface'
 
@@ -42,6 +43,14 @@ class GlobalExceptionFilter implements ExceptionFilter<unknown> {
     const isInstanceOfError = exception instanceof Error
     if (!isInstanceOfError) {
       return HttpStatus[HttpStatus.INTERNAL_SERVER_ERROR]
+    }
+
+    if (
+      exception instanceof TypeORMError &&
+      'detail' in exception &&
+      typeof exception.detail === 'string'
+    ) {
+      throw new Error(exception.detail)
     }
 
     if (exception instanceof HttpException) {
