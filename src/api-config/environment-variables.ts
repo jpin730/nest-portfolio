@@ -32,6 +32,11 @@ export class EnvironmentVariables {
   @IsString()
   @IsNotEmpty()
   DB_PASS: string
+
+  @Transform(numberTransform)
+  @IsInt()
+  @Min(12)
+  AUTH_SALT_ROUNDS: number
 }
 
 export class MigrationEnvironmentVariables extends PickType(EnvironmentVariables, [

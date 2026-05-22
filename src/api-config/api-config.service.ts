@@ -16,8 +16,7 @@ export class ApiConfigService {
   constructor(private readonly configService: ConfigService<EnvironmentVariables, true>) {}
 
   get port(): number {
-    const port = this.configService.get('PORT', { infer: true })
-    return port
+    return this.configService.get('PORT', { infer: true })
   }
 
   get database(): Database {
@@ -27,5 +26,9 @@ export class ApiConfigService {
     const username = this.configService.get('DB_USER', { infer: true })
     const password = this.configService.get('DB_PASS', { infer: true })
     return { host, port, database, username, password }
+  }
+
+  get authSaltRounds(): number {
+    return this.configService.get('AUTH_SALT_ROUNDS', { infer: true })
   }
 }
