@@ -45,3 +45,11 @@ For security reasons, scripts are ignored on install. For setting up Husky, run 
 ```bash
 pnpm prepare
 ```
+
+## Secrets
+
+For JWT and cookies, generate the secrets using:
+
+```bash
+openssl rand -hex 32
+```
