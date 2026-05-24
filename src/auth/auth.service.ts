@@ -1,11 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
+import { compare, hash } from 'bcrypt'
 import { Repository } from 'typeorm'
 
 import { ApiConfigService } from '@api-config/api-config.service'
 import { UserEntity } from '@database/entities/user.entity'
 
-import { hash } from 'bcrypt'
+import { AUTH_MESSAGES } from './consts/messages'
+import { LoginDto } from './dtos/login.dto'
 import { RegisterDto } from './dtos/register.dto'
 
 @Injectable()
@@ -27,5 +29,17 @@ export class AuthService {
     const user = this.userRepository.create({ email, password: hashedPassword })
     await this.userRepository.save(user)
     this.isRegistrationEnable = false
+  }
+
+  async login({ email, password }: LoginDto): Promise<void> {
+    const user = await this.userRepository.findOne({ where: { email } })
+    if (!user) {
+      throw new UnauthorizedException(AUTH_MESSAGES.INVALID_CREDENTIALS)
+    }
+
+    const isPasswordValid = await compare(password, user.password)
+    if (!isPasswordValid) {
+      throw new UnauthorizedException(AUTH_MESSAGES.INVALID_CREDENTIALS)
+    }
   }
 }
