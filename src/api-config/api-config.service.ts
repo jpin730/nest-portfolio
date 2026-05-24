@@ -31,4 +31,8 @@ export class ApiConfigService {
   get authSaltRounds(): number {
     return this.configService.get('AUTH_SALT_ROUNDS', { infer: true })
   }
+
+  get jwtSecret(): string {
+    return this.configService.get('AUTH_JWT_SECRET', { infer: true })
+  }
 }

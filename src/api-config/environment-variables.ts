@@ -1,6 +1,6 @@
 import { PickType } from '@nestjs/mapped-types'
 import { Transform } from 'class-transformer'
-import { IsInt, IsNotEmpty, IsString, Max, Min } from 'class-validator'
+import { IsInt, IsNotEmpty, IsString, Length, Max, Min } from 'class-validator'
 
 import { numberTransform } from '@common/transforms/number.transform'
 
@@ -32,6 +32,11 @@ export class EnvironmentVariables {
   @IsString()
   @IsNotEmpty()
   DB_PASS: string
+
+  @IsString()
+  @IsNotEmpty()
+  @Length(64)
+  AUTH_JWT_SECRET: string
 
   @Transform(numberTransform)
   @IsInt()
