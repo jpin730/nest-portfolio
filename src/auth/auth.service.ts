@@ -7,10 +7,11 @@ import { Repository } from 'typeorm'
 import { ApiConfigService } from '@api-config/api-config.service'
 import { UserEntity } from '@database/entities/user.entity'
 
-import { AUTH_MESSAGES } from './consts/messages'
-import { TOKEN_EXPIRATION, TokenExpiration } from './consts/token-expiration'
+import { AUTH_MESSAGE } from './consts/message'
+import { TOKEN_CONFIG, TokenConfig } from './consts/token-config'
 import { LoginDto } from './dtos/login.dto'
 import { RegisterDto } from './dtos/register.dto'
+import { LoginResult } from './interfaces/login-result'
 import { TokenPayload } from './interfaces/token-payload'
 
 @Injectable()
@@ -35,30 +36,30 @@ export class AuthService {
     this.isRegistrationEnable = false
   }
 
-  async login({ email, password }: LoginDto): Promise<void> {
+  async login({ email, password }: LoginDto): Promise<LoginResult> {
     const user = await this.userRepository.findOne({ where: { email } })
     if (!user) {
-      throw new UnauthorizedException(AUTH_MESSAGES.INVALID_CREDENTIALS)
+      throw new UnauthorizedException(AUTH_MESSAGE.INVALID_CREDENTIALS)
     }
 
     const isPasswordValid = await compare(password, user.password)
     if (!isPasswordValid) {
-      throw new UnauthorizedException(AUTH_MESSAGES.INVALID_CREDENTIALS)
+      throw new UnauthorizedException(AUTH_MESSAGE.INVALID_CREDENTIALS)
     }
 
     const payload: TokenPayload = { sub: user.id }
-    const accessToken = await this.generateToken(payload, TOKEN_EXPIRATION.ACCESS)
-    const refreshToken = await this.generateToken(payload, TOKEN_EXPIRATION.REFRESH)
+    const accessToken = await this.generateToken(payload, TOKEN_CONFIG.ACCESS_TOKEN)
+    const refreshToken = await this.generateToken(payload, TOKEN_CONFIG.REFRESH_TOKEN)
 
-    console.info(accessToken)
-    console.info(refreshToken)
+    return { accessToken, refreshToken }
   }
 
   private async generateToken<T extends object = object>(
     payload: T,
-    expiresIn: TokenExpiration,
+    tokenConfig: TokenConfig,
   ): Promise<string> {
-    const secret = this.apiConfigService.jwtSecret
+    const secret = this.apiConfigService.authJwtSecret
+    const expiresIn = tokenConfig.expirationMin * 60
     return this.jwtService.signAsync<T>(payload, { secret, expiresIn })
   }
 }

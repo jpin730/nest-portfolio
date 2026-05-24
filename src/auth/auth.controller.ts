@@ -1,8 +1,10 @@
-import { Body, Controller, Post } from '@nestjs/common'
+import { Body, Controller, Post, UseInterceptors } from '@nestjs/common'
 
 import { AuthService } from './auth.service'
 import { LoginDto } from './dtos/login.dto'
 import { RegisterDto } from './dtos/register.dto'
+import { SetAuthCookiesInterceptor } from './interceptors/set-auth-cookies.interceptor'
+import { LoginResult } from './interfaces/login-result'
 
 @Controller('auth')
 export class AuthController {
@@ -14,7 +16,8 @@ export class AuthController {
   }
 
   @Post('login')
-  async login(@Body() body: LoginDto): Promise<void> {
-    await this.authService.login(body)
+  @UseInterceptors(SetAuthCookiesInterceptor)
+  async login(@Body() body: LoginDto): Promise<LoginResult> {
+    return await this.authService.login(body)
   }
 }

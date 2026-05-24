@@ -1,10 +1,21 @@
 import { PickType } from '@nestjs/mapped-types'
 import { Transform } from 'class-transformer'
-import { IsInt, IsNotEmpty, IsString, Length, Max, Min } from 'class-validator'
+import { IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, Length, Max, Min } from 'class-validator'
 
 import { numberTransform } from '@common/transforms/number.transform'
 
+import { Env } from './env'
+
 export class EnvironmentVariables {
+  @IsString()
+  @IsNotEmpty()
+  @Length(64)
+  COOKIE_SECRET: string
+
+  @IsEnum(Env)
+  @IsOptional()
+  ENV: Env = Env.DEVELOPMENT
+
   @Transform(numberTransform)
   @IsInt()
   @Min(0)
