@@ -2,9 +2,11 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
+import { Cron, CronExpression } from '@nestjs/schedule'
 import { compare, hash } from 'bcrypt'
 import { DataSource, LessThan } from 'typeorm'
 
@@ -22,6 +24,7 @@ import { hashToken } from './utils/hash-token'
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name)
   private isRegistrationEnable = false
 
   constructor(
@@ -97,9 +100,16 @@ export class AuthService {
         expiresAt: new Date(exp * 1000),
       })
       await entityManager.save(refreshTokenEntity)
-      await entityManager.delete(RefreshTokenEntity, {
+    })
+  }
+
+  @Cron(CronExpression.EVERY_HOUR)
+  async cleanupExpiredTokens(): Promise<void> {
+    await this.dataSource.transaction(async (entityManager) => {
+      const { affected } = await entityManager.delete(RefreshTokenEntity, {
         expiresAt: LessThan(new Date()),
       })
+      this.logger.log(`Cleaned up ${affected} expired refresh tokens`)
     })
   }
 }
