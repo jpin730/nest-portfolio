@@ -8,15 +8,17 @@ import {
 import { JwtService } from '@nestjs/jwt'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { compare, hash } from 'bcrypt'
-import { DataSource, LessThan } from 'typeorm'
+import { DataSource, LessThan, MoreThan } from 'typeorm'
 
 import { ApiConfigService } from '@api-config/api-config.service'
+import { validateAndParse } from '@common/utils/validate-and-parse'
 import { RefreshTokenEntity } from '@database/entities/refresh-token.entity'
 import { UserEntity } from '@database/entities/user.entity'
 
 import { AUTH_MESSAGE } from './consts/message'
 import { TOKEN_CONFIG, TokenConfig } from './consts/token-config'
 import { LoginDto } from './dtos/login.dto'
+import { RefreshDto } from './dtos/refresh.dto'
 import { RegisterDto } from './dtos/register.dto'
 import { LoginResult } from './interfaces/login-result'
 import { TokenPayload } from './interfaces/token-payload'
@@ -72,11 +74,41 @@ export class AuthService {
     }
 
     const payload: TokenPayload = { sub: user.id }
-    const accessToken = await this.generateToken(payload, TOKEN_CONFIG.ACCESS_TOKEN)
-    const refreshToken = await this.generateToken(payload, TOKEN_CONFIG.REFRESH_TOKEN)
+    const { accessToken, refreshToken } = await this.generateTokenPair(payload)
 
     await this.storeRefreshToken(refreshToken)
 
+    return { accessToken, refreshToken }
+  }
+
+  async refresh({ refreshToken: oldRefreshToken }: RefreshDto): Promise<LoginResult> {
+    const secret = this.apiConfigService.authJwtSecret
+    const rawPayload: unknown = await this.jwtService.verifyAsync(oldRefreshToken, { secret })
+    const { sub } = validateAndParse(TokenPayload, rawPayload) as Required<TokenPayload>
+
+    const storedRefreshToken = await this.dataSource.manager.findOne(RefreshTokenEntity, {
+      where: {
+        tokenHash: hashToken(oldRefreshToken),
+        expiresAt: MoreThan(new Date()),
+        userId: sub,
+      },
+    })
+
+    if (!storedRefreshToken) {
+      throw new UnauthorizedException(AUTH_MESSAGE.INVALID_CREDENTIALS)
+    }
+
+    const payload: TokenPayload = { sub }
+    const { accessToken, refreshToken } = await this.generateTokenPair(payload)
+
+    await this.storeRefreshToken(refreshToken, oldRefreshToken)
+
+    return { accessToken, refreshToken }
+  }
+
+  private async generateTokenPair(payload: TokenPayload): Promise<LoginResult> {
+    const accessToken = await this.generateToken(payload, TOKEN_CONFIG.ACCESS_TOKEN)
+    const refreshToken = await this.generateToken(payload, TOKEN_CONFIG.REFRESH_TOKEN)
     return { accessToken, refreshToken }
   }
 
@@ -89,17 +121,20 @@ export class AuthService {
     return this.jwtService.signAsync<T>(payload, { secret, expiresIn })
   }
 
-  private async storeRefreshToken(token: string): Promise<void> {
+  private async storeRefreshToken(token: string, oldRefreshToken?: string): Promise<void> {
     const tokenHash = hashToken(token)
     const { sub: userId, exp } = this.jwtService.decode<Required<TokenPayload>>(token)
 
     await this.dataSource.transaction(async (entityManager) => {
-      const refreshTokenEntity = entityManager.create(RefreshTokenEntity, {
+      const refreshToken = entityManager.create(RefreshTokenEntity, {
         userId,
         tokenHash,
         expiresAt: new Date(exp * 1000),
       })
-      await entityManager.save(refreshTokenEntity)
+      await entityManager.save(refreshToken)
+      if (oldRefreshToken) {
+        await entityManager.delete(RefreshTokenEntity, { tokenHash: hashToken(oldRefreshToken) })
+      }
     })
   }
 

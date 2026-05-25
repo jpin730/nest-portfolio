@@ -6,10 +6,10 @@ export const VALIDATION_PIPE_PROVIDER: FactoryProvider<ValidationPipe> = {
   useFactory: () =>
     new ValidationPipe({
       whitelist: true,
-      forbidNonWhitelisted: true,
       transform: true,
       transformOptions: {
         enableImplicitConversion: true,
       },
+      validateCustomDecorators: true,
     }),
 }
