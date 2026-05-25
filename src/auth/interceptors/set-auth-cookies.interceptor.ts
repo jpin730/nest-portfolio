@@ -32,6 +32,7 @@ export class SetAuthCookiesInterceptor implements NestInterceptor {
     response.cookie(tokenConfig.cookieName, value, {
       httpOnly: true,
       sameSite: 'strict',
+      signed: true,
       secure,
       maxAge,
     })
