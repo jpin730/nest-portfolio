@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 
+import { Env } from './env'
 import { EnvironmentVariables } from './environment-variables'
 
 interface Database {
@@ -15,12 +16,12 @@ interface Database {
 export class ApiConfigService {
   constructor(private readonly configService: ConfigService<EnvironmentVariables, true>) {}
 
-  get env(): EnvironmentVariables['ENV'] {
-    return this.configService.get('ENV', { infer: true })
+  get authJwtSecret(): string {
+    return this.configService.get('AUTH_JWT_SECRET', { infer: true })
   }
 
-  get port(): number {
-    return this.configService.get('PORT', { infer: true })
+  get authSaltRounds(): number {
+    return this.configService.get('AUTH_SALT_ROUNDS', { infer: true })
   }
 
   get cookieSecret(): string {
@@ -36,11 +37,11 @@ export class ApiConfigService {
     return { host, port, database, username, password }
   }
 
-  get authJwtSecret(): string {
-    return this.configService.get('AUTH_JWT_SECRET', { infer: true })
+  get env(): Env {
+    return this.configService.get('ENV', { infer: true })
   }
 
-  get authSaltRounds(): number {
-    return this.configService.get('AUTH_SALT_ROUNDS', { infer: true })
+  get port(): number {
+    return this.configService.get('PORT', { infer: true })
   }
 }
