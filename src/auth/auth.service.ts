@@ -1,10 +1,15 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
-import { InjectRepository } from '@nestjs/typeorm'
 import { compare, hash } from 'bcrypt'
-import { Repository } from 'typeorm'
+import { DataSource, LessThan } from 'typeorm'
 
 import { ApiConfigService } from '@api-config/api-config.service'
+import { RefreshTokenEntity } from '@database/entities/refresh-token.entity'
 import { UserEntity } from '@database/entities/user.entity'
 
 import { AUTH_MESSAGE } from './consts/message'
@@ -13,6 +18,7 @@ import { LoginDto } from './dtos/login.dto'
 import { RegisterDto } from './dtos/register.dto'
 import { LoginResult } from './interfaces/login-result'
 import { TokenPayload } from './interfaces/token-payload'
+import { hashToken } from './utils/hash-token'
 
 @Injectable()
 export class AuthService {
@@ -20,24 +26,39 @@ export class AuthService {
 
   constructor(
     private readonly apiConfigService: ApiConfigService,
+    private readonly dataSource: DataSource,
     private readonly jwtService: JwtService,
-    @InjectRepository(UserEntity) private readonly userRepository: Repository<UserEntity>,
   ) {}
 
   async register({ email, password }: RegisterDto): Promise<void> {
     if (!this.isRegistrationEnable) {
-      throw new NotFoundException()
+      throw new ForbiddenException(AUTH_MESSAGE.REGISTRATION_DISABLED)
+    }
+
+    const existingUser = await this.dataSource.manager.findOne(UserEntity, {
+      where: { email },
+    })
+
+    if (existingUser) {
+      throw new BadRequestException(AUTH_MESSAGE.EMAIL_ALREADY_EXISTS)
     }
 
     const saltRounds = this.apiConfigService.authSaltRounds
     const hashedPassword = await hash(password, saltRounds)
-    const user = this.userRepository.create({ email, password: hashedPassword })
-    await this.userRepository.save(user)
+
+    await this.dataSource.transaction(async (entityManager) => {
+      const user = entityManager.create(UserEntity, { email, password: hashedPassword })
+      await entityManager.save(user)
+    })
+
     this.isRegistrationEnable = false
   }
 
   async login({ email, password }: LoginDto): Promise<LoginResult> {
-    const user = await this.userRepository.findOne({ where: { email } })
+    const user = await this.dataSource.manager.findOne(UserEntity, {
+      where: { email },
+    })
+
     if (!user) {
       throw new UnauthorizedException(AUTH_MESSAGE.INVALID_CREDENTIALS)
     }
@@ -51,6 +72,8 @@ export class AuthService {
     const accessToken = await this.generateToken(payload, TOKEN_CONFIG.ACCESS_TOKEN)
     const refreshToken = await this.generateToken(payload, TOKEN_CONFIG.REFRESH_TOKEN)
 
+    await this.storeRefreshToken(refreshToken)
+
     return { accessToken, refreshToken }
   }
 
@@ -61,5 +84,22 @@ export class AuthService {
     const secret = this.apiConfigService.authJwtSecret
     const expiresIn = tokenConfig.expirationMin * 60
     return this.jwtService.signAsync<T>(payload, { secret, expiresIn })
+  }
+
+  private async storeRefreshToken(token: string): Promise<void> {
+    const tokenHash = hashToken(token)
+    const { sub: userId, exp } = this.jwtService.decode<Required<TokenPayload>>(token)
+
+    await this.dataSource.transaction(async (entityManager) => {
+      const refreshTokenEntity = entityManager.create(RefreshTokenEntity, {
+        userId,
+        tokenHash,
+        expiresAt: new Date(exp * 1000),
+      })
+      await entityManager.save(refreshTokenEntity)
+      await entityManager.delete(RefreshTokenEntity, {
+        expiresAt: LessThan(new Date()),
+      })
+    })
   }
 }
