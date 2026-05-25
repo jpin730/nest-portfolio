@@ -12,11 +12,17 @@ import { LoginResult } from '../interfaces/login-result'
 export class SetAuthCookiesInterceptor implements NestInterceptor {
   constructor(private readonly apiConfigService: ApiConfigService) {}
 
-  intercept(context: ExecutionContext, next: CallHandler<LoginResult>): Observable<null> {
+  intercept(context: ExecutionContext, next: CallHandler<LoginResult | null>): Observable<null> {
     const response = context.switchToHttp().getResponse<Response>()
 
     return next.handle().pipe(
       map((data) => {
+        if (!data) {
+          response.clearCookie(TOKEN_CONFIG.ACCESS_TOKEN.cookieName)
+          response.clearCookie(TOKEN_CONFIG.REFRESH_TOKEN.cookieName)
+          return null
+        }
+
         const { accessToken, refreshToken } = data
         this.setCookie(response, accessToken, TOKEN_CONFIG.ACCESS_TOKEN)
         this.setCookie(response, refreshToken, TOKEN_CONFIG.REFRESH_TOKEN)

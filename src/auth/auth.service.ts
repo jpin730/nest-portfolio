@@ -18,6 +18,7 @@ import { UserEntity } from '@database/entities/user.entity'
 import { AUTH_MESSAGE } from './consts/message'
 import { TOKEN_CONFIG, TokenConfig } from './consts/token-config'
 import { LoginDto } from './dtos/login.dto'
+import { LogoutDto } from './dtos/logout.dto'
 import { RefreshDto } from './dtos/refresh.dto'
 import { RegisterDto } from './dtos/register.dto'
 import { LoginResult } from './interfaces/login-result'
@@ -82,9 +83,7 @@ export class AuthService {
   }
 
   async refresh({ refreshToken: oldRefreshToken }: RefreshDto): Promise<LoginResult> {
-    const secret = this.apiConfigService.authJwtSecret
-    const rawPayload: unknown = await this.jwtService.verifyAsync(oldRefreshToken, { secret })
-    const { sub } = validateAndParse(TokenPayload, rawPayload) as Required<TokenPayload>
+    const { sub } = await this.validateToken(oldRefreshToken)
 
     const storedRefreshToken = await this.dataSource.manager.findOne(RefreshTokenEntity, {
       where: {
@@ -106,6 +105,26 @@ export class AuthService {
     return { accessToken, refreshToken }
   }
 
+  async logout({ refreshToken }: LogoutDto): Promise<void> {
+    const { sub } = await this.validateToken(refreshToken)
+    const storedRefreshToken = await this.dataSource.manager.findOne(RefreshTokenEntity, {
+      where: {
+        tokenHash: hashToken(refreshToken),
+        expiresAt: MoreThan(new Date()),
+        userId: sub,
+      },
+    })
+
+    if (!storedRefreshToken) {
+      throw new UnauthorizedException(AUTH_MESSAGE.INVALID_CREDENTIALS)
+    }
+
+    await this.dataSource.transaction(async (entityManager) => {
+      const id = storedRefreshToken.id
+      await entityManager.delete(RefreshTokenEntity, { id })
+    })
+  }
+
   private async generateTokenPair(payload: TokenPayload): Promise<LoginResult> {
     const accessToken = await this.generateToken(payload, TOKEN_CONFIG.ACCESS_TOKEN)
     const refreshToken = await this.generateToken(payload, TOKEN_CONFIG.REFRESH_TOKEN)
@@ -119,6 +138,12 @@ export class AuthService {
     const secret = this.apiConfigService.authJwtSecret
     const expiresIn = tokenConfig.expirationMin * 60
     return this.jwtService.signAsync<T>(payload, { secret, expiresIn })
+  }
+
+  private async validateToken(token: string): Promise<Required<TokenPayload>> {
+    const secret = this.apiConfigService.authJwtSecret
+    const rawPayload: unknown = await this.jwtService.verifyAsync(token, { secret })
+    return validateAndParse(TokenPayload, rawPayload) as Required<TokenPayload>
   }
 
   private async storeRefreshToken(token: string, oldRefreshToken?: string): Promise<void> {
