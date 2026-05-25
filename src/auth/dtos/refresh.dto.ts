@@ -1,7 +1,7 @@
 import { Expose } from 'class-transformer'
 import { IsJWT } from 'class-validator'
 
-import { TOKEN_CONFIG } from '@auth/consts/token-config'
+import { TOKEN_CONFIG } from '@auth/consts/token-config.const'
 
 export class RefreshDto {
   @IsJWT()

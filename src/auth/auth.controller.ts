@@ -8,7 +8,7 @@ import { LogoutDto } from './dtos/logout.dto'
 import { RefreshDto } from './dtos/refresh.dto'
 import { RegisterDto } from './dtos/register.dto'
 import { SetAuthCookiesInterceptor } from './interceptors/set-auth-cookies.interceptor'
-import { LoginResult } from './interfaces/login-result'
+import { LoginResult } from './interfaces/login-result.interface'
 
 @Controller('auth')
 export class AuthController {

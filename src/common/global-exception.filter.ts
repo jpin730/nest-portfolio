@@ -10,8 +10,8 @@ import {
 import { APP_FILTER, HttpAdapterHost } from '@nestjs/core'
 import { TypeORMError } from 'typeorm'
 
-import { ApiResponse } from './api-response.interface'
-import { isStringArray } from './utils/is-string-array'
+import { ApiResponse } from './interfaces/api-response.interface'
+import { isStringArray } from './utils/is-string-array.util'
 
 @Catch()
 class GlobalExceptionFilter implements ExceptionFilter<unknown> {

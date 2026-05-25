@@ -13,9 +13,9 @@ import {
 
 import { numberTransform } from '@common/transforms/number.transform'
 
-import { Env } from './env'
+import { Env } from '../enums/env.enum'
 
-export class EnvironmentVariables {
+export class EnvsDto {
   @IsHexadecimal()
   @Length(64)
   COOKIE_SECRET: string
@@ -61,7 +61,7 @@ export class EnvironmentVariables {
   AUTH_SALT_ROUNDS: number
 }
 
-export class MigrationEnvironmentVariables extends PickType(EnvironmentVariables, [
+export class MigrationEnvsDto extends PickType(EnvsDto, [
   'DB_HOST',
   'DB_PORT',
   'DB_NAME',

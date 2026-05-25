@@ -1,8 +1,8 @@
 import { Column, Entity, OneToMany } from 'typeorm'
 
-import { composeTransformers } from '../transformers/compose'
 import { LowercaseTransformer } from '../transformers/lowercase.transformer'
 import { TrimTransformer } from '../transformers/trim.transformer'
+import { composeTransformers } from '../utils/compose-transformers.util'
 import { BaseEntity } from './base.entity'
 import { RefreshTokenEntity } from './refresh-token.entity'
 

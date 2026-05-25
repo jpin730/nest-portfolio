@@ -2,11 +2,11 @@ import { Global, Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 
 import { ApiConfigService } from './api-config.service'
-import { validate } from './validate'
+import { validateEnvs } from './utils/validate-envs.util'
 
 @Global()
 @Module({
-  imports: [ConfigModule.forRoot({ validate })],
+  imports: [ConfigModule.forRoot({ validate: validateEnvs })],
   providers: [ApiConfigService],
   exports: [ApiConfigService],
 })

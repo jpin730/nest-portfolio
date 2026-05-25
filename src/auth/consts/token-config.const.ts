@@ -1,4 +1,4 @@
-const TOKEN_COOKIE_NAME = {
+export const TOKEN_COOKIE_NAME = {
   ACCESS_TOKEN: 'access_token',
   REFRESH_TOKEN: 'refresh_token',
 } as const

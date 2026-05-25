@@ -11,19 +11,20 @@ import { compare, hash } from 'bcrypt'
 import { DataSource, LessThan, MoreThan } from 'typeorm'
 
 import { ApiConfigService } from '@api-config/api-config.service'
-import { validateAndParse } from '@common/utils/validate-and-parse'
+import { validateAndParse } from '@common/utils/validate-and-parse.util'
 import { RefreshTokenEntity } from '@database/entities/refresh-token.entity'
 import { UserEntity } from '@database/entities/user.entity'
 
-import { AUTH_MESSAGE } from './consts/message'
-import { TOKEN_CONFIG, TokenConfig } from './consts/token-config'
+import { AUTH_ERROR_MESSAGE } from './consts/auth-error-message.const'
+import { TOKEN_CONFIG, TokenConfig } from './consts/token-config.const'
 import { LoginDto } from './dtos/login.dto'
 import { LogoutDto } from './dtos/logout.dto'
 import { RefreshDto } from './dtos/refresh.dto'
 import { RegisterDto } from './dtos/register.dto'
-import { LoginResult } from './interfaces/login-result'
-import { TokenPayload } from './interfaces/token-payload'
-import { hashToken } from './utils/hash-token'
+import { TokenPayloadDto } from './dtos/token-payload.dto'
+import { LoginResult } from './interfaces/login-result.interface'
+import { TokenPayload } from './interfaces/token-payload.interface'
+import { hashToken } from './utils/hash-token.util'
 
 @Injectable()
 export class AuthService {
@@ -38,7 +39,7 @@ export class AuthService {
 
   async register({ email, password }: RegisterDto): Promise<void> {
     if (!this.isRegistrationEnable) {
-      throw new ForbiddenException(AUTH_MESSAGE.REGISTRATION_DISABLED)
+      throw new ForbiddenException(AUTH_ERROR_MESSAGE.REGISTRATION_DISABLED)
     }
 
     const existingUser = await this.dataSource.manager.findOne(UserEntity, {
@@ -46,7 +47,7 @@ export class AuthService {
     })
 
     if (existingUser) {
-      throw new BadRequestException(AUTH_MESSAGE.EMAIL_ALREADY_EXISTS)
+      throw new BadRequestException(AUTH_ERROR_MESSAGE.EMAIL_ALREADY_EXISTS)
     }
 
     const saltRounds = this.apiConfigService.authSaltRounds
@@ -66,16 +67,15 @@ export class AuthService {
     })
 
     if (!user) {
-      throw new UnauthorizedException(AUTH_MESSAGE.INVALID_CREDENTIALS)
+      throw new UnauthorizedException(AUTH_ERROR_MESSAGE.INVALID_CREDENTIALS)
     }
 
     const isPasswordValid = await compare(password, user.password)
     if (!isPasswordValid) {
-      throw new UnauthorizedException(AUTH_MESSAGE.INVALID_CREDENTIALS)
+      throw new UnauthorizedException(AUTH_ERROR_MESSAGE.INVALID_CREDENTIALS)
     }
 
-    const payload: TokenPayload = { sub: user.id }
-    const { accessToken, refreshToken } = await this.generateTokenPair(payload)
+    const { accessToken, refreshToken } = await this.generateTokenPair({ sub: user.id })
 
     await this.storeRefreshToken(refreshToken)
 
@@ -94,11 +94,10 @@ export class AuthService {
     })
 
     if (!storedRefreshToken) {
-      throw new UnauthorizedException(AUTH_MESSAGE.INVALID_CREDENTIALS)
+      throw new UnauthorizedException(AUTH_ERROR_MESSAGE.INVALID_CREDENTIALS)
     }
 
-    const payload: TokenPayload = { sub }
-    const { accessToken, refreshToken } = await this.generateTokenPair(payload)
+    const { accessToken, refreshToken } = await this.generateTokenPair({ sub })
 
     await this.storeRefreshToken(refreshToken, oldRefreshToken)
 
@@ -116,7 +115,7 @@ export class AuthService {
     })
 
     if (!storedRefreshToken) {
-      throw new UnauthorizedException(AUTH_MESSAGE.INVALID_CREDENTIALS)
+      throw new UnauthorizedException(AUTH_ERROR_MESSAGE.INVALID_CREDENTIALS)
     }
 
     await this.dataSource.transaction(async (entityManager) => {
@@ -140,10 +139,10 @@ export class AuthService {
     return this.jwtService.signAsync<T>(payload, { secret, expiresIn })
   }
 
-  private async validateToken(token: string): Promise<Required<TokenPayload>> {
+  private async validateToken(token: string): Promise<TokenPayloadDto> {
     const secret = this.apiConfigService.authJwtSecret
     const rawPayload: unknown = await this.jwtService.verifyAsync(token, { secret })
-    return validateAndParse(TokenPayload, rawPayload) as Required<TokenPayload>
+    return validateAndParse(TokenPayloadDto, rawPayload)
   }
 
   private async storeRefreshToken(token: string, oldRefreshToken?: string): Promise<void> {

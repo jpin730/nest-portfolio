@@ -12,7 +12,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
-    "typeorm:config": "export MIGRATION=true && tsx -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d src/database/data-source.ts",
+    "typeorm:config": "export MIGRATION=true && tsx -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d src/database/consts/data-source.const.ts",
     "migration:generate": "pnpm typeorm:config migration:generate --pretty src/database/migrations/migration && eslint --fix src/database/migrations/*.ts",
     "migration:run": "pnpm typeorm:config migration:run",
     "migration:revert": "pnpm typeorm:config migration:revert",

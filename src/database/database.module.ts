@@ -3,9 +3,9 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 
 import { ApiConfigModule } from '@api-config/api-config.module'
 import { ApiConfigService } from '@api-config/api-config.service'
-import { Env } from '@api-config/env'
+import { Env } from '@api-config/enums/env.enum'
 
-import { DataSourceConfig } from './data-source'
+import { DATA_SOURCE_OPTIONS } from './consts/data-source.const'
 
 @Module({
   imports: [
@@ -13,8 +13,8 @@ import { DataSourceConfig } from './data-source'
       imports: [ApiConfigModule],
       useFactory: (apiConfigService: ApiConfigService) => {
         const env = apiConfigService.env
-        const logging = env !== Env.PRODUCTION
-        return { ...DataSourceConfig, logging }
+        const logging = env !== Env.Production
+        return { ...DATA_SOURCE_OPTIONS, logging }
       },
       inject: [ApiConfigService],
     }),

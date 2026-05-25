@@ -8,7 +8,7 @@ import {
 import { APP_INTERCEPTOR } from '@nestjs/core'
 import { map, Observable } from 'rxjs'
 
-import { ApiResponse } from './api-response.interface'
+import { ApiResponse } from './interfaces/api-response.interface'
 
 @Injectable()
 class GlobalResponseInterceptor implements NestInterceptor {
