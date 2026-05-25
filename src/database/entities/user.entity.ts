@@ -1,9 +1,10 @@
-import { Column, Entity } from 'typeorm'
+import { Column, Entity, OneToMany } from 'typeorm'
 
 import { composeTransformers } from '../transformers/compose'
 import { LowercaseTransformer } from '../transformers/lowercase.transformer'
 import { TrimTransformer } from '../transformers/trim.transformer'
 import { BaseEntity } from './base.entity'
+import { RefreshTokenEntity } from './refresh-token.entity'
 
 @Entity({ name: 'users' })
 export class UserEntity extends BaseEntity {
@@ -21,4 +22,7 @@ export class UserEntity extends BaseEntity {
     transformer: TrimTransformer,
   })
   password: string
+
+  @OneToMany(() => RefreshTokenEntity, (e) => e.user)
+  refreshTokens: RefreshTokenEntity[]
 }
