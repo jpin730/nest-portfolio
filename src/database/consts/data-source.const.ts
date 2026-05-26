@@ -17,12 +17,10 @@ export const DATA_SOURCE_OPTIONS: DataSourceOptions = {
   password: env.DB_PASS,
   database: env.DB_NAME,
   ssl: true,
-  extra: {
-    channelBinding: 'require',
-  },
+  extra: { channelBinding: 'require' },
   synchronize: false,
-  entities: [__dirname + '/entities/*.entity.{ts,js}'],
-  migrations: [__dirname + '/migrations/*.ts'],
+  entities: [__dirname + '/../entities/*.entity.{ts,js}'],
+  migrations: [__dirname + '/../migrations/*.ts'],
   namingStrategy: new SnakeNamingStrategy(),
   logging: true,
 }
