@@ -7,7 +7,7 @@ import { LoginDto } from './dtos/login.dto'
 import { LogoutDto } from './dtos/logout.dto'
 import { RefreshDto } from './dtos/refresh.dto'
 import { RegisterDto } from './dtos/register.dto'
-import { SetAuthCookiesInterceptor } from './interceptors/set-auth-cookies.interceptor'
+import { AuthCookiesInterceptor } from './interceptors/auth-cookies.interceptor'
 import { LoginResult } from './interfaces/login-result.interface'
 
 @Controller('auth')
@@ -20,19 +20,19 @@ export class AuthController {
   }
 
   @Post('login')
-  @UseInterceptors(SetAuthCookiesInterceptor)
+  @UseInterceptors(AuthCookiesInterceptor)
   async login(@Body() body: LoginDto): Promise<LoginResult> {
     return await this.authService.login(body)
   }
 
   @Post('refresh')
-  @UseInterceptors(SetAuthCookiesInterceptor)
+  @UseInterceptors(AuthCookiesInterceptor)
   async refresh(@SignedCookies() cookies: RefreshDto): Promise<LoginResult> {
     return await this.authService.refresh(cookies)
   }
 
   @Post('logout')
-  @UseInterceptors(SetAuthCookiesInterceptor)
+  @UseInterceptors(AuthCookiesInterceptor)
   async logout(@SignedCookies() cookies: LogoutDto): Promise<void> {
     await this.authService.logout(cookies)
   }

@@ -9,7 +9,7 @@ import { TOKEN_CONFIG, TOKEN_COOKIE_NAME, TokenConfig } from '../consts/token-co
 import { LoginResult } from '../interfaces/login-result.interface'
 
 @Injectable()
-export class SetAuthCookiesInterceptor implements NestInterceptor {
+export class AuthCookiesInterceptor implements NestInterceptor {
   constructor(private readonly apiConfigService: ApiConfigService) {}
 
   intercept(context: ExecutionContext, next: CallHandler<LoginResult | null>): Observable<null> {
