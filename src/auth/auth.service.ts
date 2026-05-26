@@ -15,6 +15,7 @@ import { validateAndParse } from '@common/utils/validate-and-parse.util'
 import { RefreshTokenEntity } from '@database/entities/refresh-token.entity'
 import { UserEntity } from '@database/entities/user.entity'
 
+import { plainToInstance } from 'class-transformer'
 import { AUTH_ERROR_MESSAGE } from './consts/auth-error-message.const'
 import { TOKEN_CONFIG, TokenConfig } from './consts/token-config.const'
 import { LoginDto } from './dtos/login.dto'
@@ -22,6 +23,7 @@ import { LogoutDto } from './dtos/logout.dto'
 import { RefreshDto } from './dtos/refresh.dto'
 import { RegisterDto } from './dtos/register.dto'
 import { TokenPayloadDto } from './dtos/token-payload.dto'
+import { UserDto } from './dtos/user.dto'
 import { LoginResult } from './interfaces/login-result.interface'
 import { TokenPayload } from './interfaces/token-payload.interface'
 import { hashToken } from './utils/hash-token.util'
@@ -42,9 +44,7 @@ export class AuthService {
       throw new ForbiddenException(AUTH_ERROR_MESSAGE.REGISTRATION_DISABLED)
     }
 
-    const existingUser = await this.dataSource.manager.findOne(UserEntity, {
-      where: { email },
-    })
+    const existingUser = await this.dataSource.manager.findOne(UserEntity, { where: { email } })
 
     if (existingUser) {
       throw new BadRequestException(AUTH_ERROR_MESSAGE.EMAIL_ALREADY_EXISTS)
@@ -62,9 +62,7 @@ export class AuthService {
   }
 
   async login({ email, password }: LoginDto): Promise<LoginResult> {
-    const user = await this.dataSource.manager.findOne(UserEntity, {
-      where: { email },
-    })
+    const user = await this.dataSource.manager.findOne(UserEntity, { where: { email } })
 
     if (!user) {
       throw new UnauthorizedException(AUTH_ERROR_MESSAGE.INVALID_CREDENTIALS)
@@ -124,6 +122,20 @@ export class AuthService {
     })
   }
 
+  async validateToken(token: string): Promise<TokenPayloadDto> {
+    const secret = this.apiConfigService.authJwtSecret
+    const rawPayload: unknown = await this.jwtService.verifyAsync(token, { secret })
+    return validateAndParse(TokenPayloadDto, rawPayload)
+  }
+
+  async findUserFromTokenPayload({ sub: id }: TokenPayloadDto): Promise<UserDto> {
+    const user = await this.dataSource.manager.findOne(UserEntity, { where: { id } })
+    if (!user) {
+      throw new UnauthorizedException(AUTH_ERROR_MESSAGE.INVALID_CREDENTIALS)
+    }
+    return plainToInstance(UserDto, user)
+  }
+
   private async generateTokenPair(payload: TokenPayload): Promise<LoginResult> {
     const accessToken = await this.generateToken(payload, TOKEN_CONFIG.ACCESS_TOKEN)
     const refreshToken = await this.generateToken(payload, TOKEN_CONFIG.REFRESH_TOKEN)
@@ -137,12 +149,6 @@ export class AuthService {
     const secret = this.apiConfigService.authJwtSecret
     const expiresIn = tokenConfig.expirationMin * 60
     return this.jwtService.signAsync<T>(payload, { secret, expiresIn })
-  }
-
-  private async validateToken(token: string): Promise<TokenPayloadDto> {
-    const secret = this.apiConfigService.authJwtSecret
-    const rawPayload: unknown = await this.jwtService.verifyAsync(token, { secret })
-    return validateAndParse(TokenPayloadDto, rawPayload)
   }
 
   private async storeRefreshToken(token: string, oldRefreshToken?: string): Promise<void> {
