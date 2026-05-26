@@ -1,12 +1,15 @@
-import { Body, Controller, Post, UseInterceptors } from '@nestjs/common'
+import { Body, Controller, Get, Post, Req, UseGuards, UseInterceptors } from '@nestjs/common'
 
 import { SignedCookies } from '@common/decorators/signed-cookies.decorator'
+import type { ApiRequest } from '@common/interfaces/api-request.interface'
 
 import { AuthService } from './auth.service'
 import { LoginDto } from './dtos/login.dto'
 import { LogoutDto } from './dtos/logout.dto'
 import { RefreshDto } from './dtos/refresh.dto'
 import { RegisterDto } from './dtos/register.dto'
+import { UserDto } from './dtos/user.dto'
+import { AuthGuard } from './guards/auth.guard'
 import { AuthCookiesInterceptor } from './interceptors/auth-cookies.interceptor'
 import { LoginResult } from './interfaces/login-result.interface'
 
@@ -35,5 +38,11 @@ export class AuthController {
   @UseInterceptors(AuthCookiesInterceptor)
   async logout(@SignedCookies() cookies: LogoutDto): Promise<void> {
     await this.authService.logout(cookies)
+  }
+
+  @Get('me')
+  @UseGuards(AuthGuard)
+  me(@Req() req: ApiRequest): UserDto {
+    return req.user!
   }
 }
