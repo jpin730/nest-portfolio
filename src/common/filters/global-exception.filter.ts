@@ -1,20 +1,19 @@
 import {
   ArgumentsHost,
   Catch,
-  ClassProvider,
   ExceptionFilter,
   HttpException,
   HttpStatus,
   Logger,
 } from '@nestjs/common'
-import { APP_FILTER, HttpAdapterHost } from '@nestjs/core'
+import { HttpAdapterHost } from '@nestjs/core'
 import { TypeORMError } from 'typeorm'
 
-import { ApiResponse } from './interfaces/api-response.interface'
-import { isStringArray } from './utils/is-string-array.util'
+import { ApiResponse } from '../interfaces/api-response.interface'
+import { isStringArray } from '../utils/is-string-array.util'
 
 @Catch()
-class GlobalExceptionFilter implements ExceptionFilter<unknown> {
+export class GlobalExceptionFilter implements ExceptionFilter<unknown> {
   private readonly logger = new Logger(GlobalExceptionFilter.name)
 
   constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
@@ -83,9 +82,4 @@ class GlobalExceptionFilter implements ExceptionFilter<unknown> {
 
     return null
   }
-}
-
-export const GLOBAL_EXCEPTION_FILTER_PROVIDER: ClassProvider<GlobalExceptionFilter> = {
-  provide: APP_FILTER,
-  useClass: GlobalExceptionFilter,
 }
