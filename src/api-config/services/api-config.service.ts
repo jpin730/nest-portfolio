@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 
-import { EnvsDto } from './dtos/envs.dto'
-import { Env } from './enums/env.enum'
+import { EnvsDto } from '../dtos/envs.dto'
+import { Env } from '../enums/env.enum'
 
 interface Database {
   host: string

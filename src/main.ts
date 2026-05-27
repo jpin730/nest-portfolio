@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core'
 import morgan from 'morgan'
 
-import { ApiConfigService } from '@api-config/api-config.service'
+import { ApiConfigService } from '@api-config/services/api-config.service'
 
 import cookieParser from 'cookie-parser'
 import { AppModule } from './app.module'

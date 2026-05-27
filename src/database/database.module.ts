@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
 import { ApiConfigModule } from '@api-config/api-config.module'
-import { ApiConfigService } from '@api-config/api-config.service'
 import { Env } from '@api-config/enums/env.enum'
+import { ApiConfigService } from '@api-config/services/api-config.service'
 
 import { DATA_SOURCE_OPTIONS } from './consts/data-source.const'
 

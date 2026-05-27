@@ -3,16 +3,16 @@ import { Body, Controller, Get, Patch, Post, Req, UseGuards, UseInterceptors } f
 import { SignedCookies } from '@common/decorators/signed-cookies.decorator'
 import type { ApiRequest } from '@common/interfaces/api-request.interface'
 
-import { AuthService } from './auth.service'
-import { LoginResultDto } from './dtos/login-result.dto'
-import { LoginDto } from './dtos/login.dto'
-import { LogoutDto } from './dtos/logout.dto'
-import { PatchMeDto } from './dtos/patch-me.dto'
-import { RefreshDto } from './dtos/refresh.dto'
-import { RegisterDto } from './dtos/register.dto'
-import { UserDto } from './dtos/user.dto'
-import { AuthGuard } from './guards/auth.guard'
-import { AuthCookiesInterceptor } from './interceptors/auth-cookies.interceptor'
+import { LoginResultDto } from '../dtos/login-result.dto'
+import { LoginDto } from '../dtos/login.dto'
+import { LogoutDto } from '../dtos/logout.dto'
+import { PatchMeDto } from '../dtos/patch-me.dto'
+import { RefreshDto } from '../dtos/refresh.dto'
+import { RegisterDto } from '../dtos/register.dto'
+import { UserDto } from '../dtos/user.dto'
+import { AuthGuard } from '../guards/auth.guard'
+import { AuthCookiesInterceptor } from '../interceptors/auth-cookies.interceptor'
+import { AuthService } from '../services/auth.service'
 
 @Controller('auth')
 export class AuthController {

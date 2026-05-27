@@ -2,8 +2,8 @@ import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nes
 import { Response } from 'express'
 import { map, Observable } from 'rxjs'
 
-import { ApiConfigService } from '@api-config/api-config.service'
 import { Env } from '@api-config/enums/env.enum'
+import { ApiConfigService } from '@api-config/services/api-config.service'
 
 import { TOKEN_CONFIG, TOKEN_COOKIE_NAME, TokenConfig } from '../consts/token-config.const'
 import { LoginResultDto } from '../dtos/login-result.dto'

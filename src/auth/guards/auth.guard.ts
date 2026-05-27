@@ -2,9 +2,9 @@ import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from
 
 import { ApiRequest } from '@common/interfaces/api-request.interface'
 
-import { AuthService } from '../auth.service'
 import { AUTH_ERROR_MESSAGE } from '../consts/auth-error-message.const'
 import { TOKEN_COOKIE_NAME } from '../consts/token-config.const'
+import { AuthService } from '../services/auth.service'
 
 @Injectable()
 export class AuthGuard implements CanActivate {
