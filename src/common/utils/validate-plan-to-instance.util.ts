@@ -1,7 +1,7 @@
 import { ClassConstructor, plainToInstance } from 'class-transformer'
 import { validateSync } from 'class-validator'
 
-export const validateAndParse = <T extends object>(
+export const validatePlanToInstance = <T extends object>(
   classType: ClassConstructor<T>,
   planObject: unknown,
 ): T => {

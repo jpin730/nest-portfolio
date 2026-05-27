@@ -20,8 +20,14 @@ export class AuthGuard implements CanActivate {
     }
 
     const payload = await this.authService.validateToken(token)
-    const user = await this.authService.findUserFromTokenPayload(payload)
+    const user = await this.authService.getUserFromTokenPayload(payload)
+
+    if (!user) {
+      throw new UnauthorizedException(AUTH_ERROR_MESSAGE.INVALID_CREDENTIALS)
+    }
+
     request.user = user
+
     return true
   }
 }

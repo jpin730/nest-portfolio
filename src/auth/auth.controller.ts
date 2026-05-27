@@ -1,17 +1,18 @@
-import { Body, Controller, Get, Post, Req, UseGuards, UseInterceptors } from '@nestjs/common'
+import { Body, Controller, Get, Patch, Post, Req, UseGuards, UseInterceptors } from '@nestjs/common'
 
 import { SignedCookies } from '@common/decorators/signed-cookies.decorator'
 import type { ApiRequest } from '@common/interfaces/api-request.interface'
 
 import { AuthService } from './auth.service'
+import { LoginResultDto } from './dtos/login-result.dto'
 import { LoginDto } from './dtos/login.dto'
 import { LogoutDto } from './dtos/logout.dto'
+import { PatchMeDto } from './dtos/patch-me.dto'
 import { RefreshDto } from './dtos/refresh.dto'
 import { RegisterDto } from './dtos/register.dto'
 import { UserDto } from './dtos/user.dto'
 import { AuthGuard } from './guards/auth.guard'
 import { AuthCookiesInterceptor } from './interceptors/auth-cookies.interceptor'
-import { LoginResult } from './interfaces/login-result.interface'
 
 @Controller('auth')
 export class AuthController {
@@ -24,13 +25,13 @@ export class AuthController {
 
   @Post('login')
   @UseInterceptors(AuthCookiesInterceptor)
-  async login(@Body() body: LoginDto): Promise<LoginResult> {
+  async login(@Body() body: LoginDto): Promise<LoginResultDto> {
     return await this.authService.login(body)
   }
 
   @Post('refresh')
   @UseInterceptors(AuthCookiesInterceptor)
-  async refresh(@SignedCookies() cookies: RefreshDto): Promise<LoginResult> {
+  async refresh(@SignedCookies() cookies: RefreshDto): Promise<LoginResultDto> {
     return await this.authService.refresh(cookies)
   }
 
@@ -42,7 +43,13 @@ export class AuthController {
 
   @Get('me')
   @UseGuards(AuthGuard)
-  me(@Req() req: ApiRequest): UserDto {
+  getMe(@Req() req: ApiRequest): UserDto {
     return req.user!
+  }
+
+  @Patch('me')
+  @UseGuards(AuthGuard)
+  async updateMe(@Req() { user }: ApiRequest, @Body() body: PatchMeDto): Promise<void> {
+    await this.authService.patchUser(user!.id, body)
   }
 }

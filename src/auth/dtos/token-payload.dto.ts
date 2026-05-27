@@ -1,10 +1,12 @@
+import { Expose } from 'class-transformer'
 import { IsNumber, IsPositive, IsUUID } from 'class-validator'
-import { TokenPayload } from '../interfaces/token-payload.interface'
 
-export class TokenPayloadDto implements TokenPayload {
+export class TokenPayloadDto {
+  @Expose()
   @IsUUID()
   sub: string
 
+  @Expose()
   @IsNumber()
   @IsPositive()
   exp: number

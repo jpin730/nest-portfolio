@@ -1,3 +1,5 @@
-import { RefreshDto } from './refresh.dto'
+import { PickType } from '@nestjs/mapped-types'
 
-export class LogoutDto extends RefreshDto {}
+import { LoginResultDto } from './login-result.dto'
+
+export class LogoutDto extends PickType(LoginResultDto, ['refreshToken']) {}

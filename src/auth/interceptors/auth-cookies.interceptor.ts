@@ -6,13 +6,13 @@ import { ApiConfigService } from '@api-config/api-config.service'
 import { Env } from '@api-config/enums/env.enum'
 
 import { TOKEN_CONFIG, TOKEN_COOKIE_NAME, TokenConfig } from '../consts/token-config.const'
-import { LoginResult } from '../interfaces/login-result.interface'
+import { LoginResultDto } from '../dtos/login-result.dto'
 
 @Injectable()
 export class AuthCookiesInterceptor implements NestInterceptor {
   constructor(private readonly apiConfigService: ApiConfigService) {}
 
-  intercept(context: ExecutionContext, next: CallHandler<LoginResult | null>): Observable<null> {
+  intercept(context: ExecutionContext, next: CallHandler<LoginResultDto | null>): Observable<null> {
     const response = context.switchToHttp().getResponse<Response>()
 
     return next.handle().pipe(

@@ -1,17 +1,5 @@
-import { Transform } from 'class-transformer'
-import { IsEmail, IsNotEmpty, IsString, Length, MaxLength } from 'class-validator'
+import { PickType } from '@nestjs/mapped-types'
 
-import { trimTransform } from '@common/transforms/trim.transform'
+import { UserDto } from './user.dto'
 
-export class RegisterDto {
-  @Transform(trimTransform)
-  @IsEmail()
-  @IsNotEmpty()
-  @MaxLength(255)
-  email: string
-
-  @Transform(trimTransform)
-  @IsString()
-  @Length(8, 20)
-  password: string
-}
+export class RegisterDto extends PickType(UserDto, ['email', 'password']) {}
