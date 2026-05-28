@@ -16,6 +16,6 @@ async function bootstrap(): Promise<void> {
 
   app.use(cookieParser(cookieSecret))
 
-  await app.listen(port)
+  await app.listen(port, '::')
 }
 void bootstrap()
