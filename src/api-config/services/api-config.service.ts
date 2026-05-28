@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 
 import { EnvsDto } from '../dtos/envs.dto'
-import { Env } from '../enums/env.enum'
+import { NodeEnv } from '../enums/node-env.enum'
 
 interface Database {
   host: string
@@ -37,8 +37,8 @@ export class ApiConfigService {
     return { host, port, database, username, password }
   }
 
-  get env(): Env {
-    return this.configService.get('ENV', { infer: true })
+  get nodeEnv(): NodeEnv {
+    return this.configService.get('NODE_ENV', { infer: true })
   }
 
   get port(): number {

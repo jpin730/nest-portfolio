@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
 import { ApiConfigModule } from '@api-config/api-config.module'
-import { Env } from '@api-config/enums/env.enum'
+import { NodeEnv } from '@api-config/enums/node-env.enum'
 import { ApiConfigService } from '@api-config/services/api-config.service'
 
 import { DATA_SOURCE_OPTIONS } from './consts/data-source.const'
@@ -12,8 +12,8 @@ import { DATA_SOURCE_OPTIONS } from './consts/data-source.const'
     TypeOrmModule.forRootAsync({
       imports: [ApiConfigModule],
       useFactory: (apiConfigService: ApiConfigService) => {
-        const env = apiConfigService.env
-        const logging = env !== Env.Production
+        const env = apiConfigService.nodeEnv
+        const logging = env !== NodeEnv.Production
         return { ...DATA_SOURCE_OPTIONS, logging }
       },
       inject: [ApiConfigService],

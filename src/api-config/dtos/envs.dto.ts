@@ -13,15 +13,15 @@ import {
 
 import { numberTransform } from '@common/transforms/number.transform'
 
-import { Env } from '../enums/env.enum'
+import { NodeEnv } from '../enums/node-env.enum'
 
 export class EnvsDto {
   @IsHexadecimal()
   @Length(64)
   COOKIE_SECRET: string
 
-  @IsEnum(Env)
-  ENV: Env
+  @IsEnum(NodeEnv)
+  NODE_ENV: NodeEnv
 
   @Transform(numberTransform)
   @IsInt()

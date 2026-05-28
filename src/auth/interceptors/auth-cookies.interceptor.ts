@@ -2,7 +2,7 @@ import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nes
 import { Response } from 'express'
 import { map, Observable } from 'rxjs'
 
-import { Env } from '@api-config/enums/env.enum'
+import { NodeEnv } from '@api-config/enums/node-env.enum'
 import { ApiConfigService } from '@api-config/services/api-config.service'
 
 import { TOKEN_CONFIG, TOKEN_COOKIE_NAME, TokenConfig } from '../consts/token-config.const'
@@ -33,8 +33,8 @@ export class AuthCookiesInterceptor implements NestInterceptor {
 
   private setCookie(response: Response, value: string, tokenConfig: TokenConfig): void {
     const maxAge = tokenConfig.expirationMin * 60 * 1000
-    const env = this.apiConfigService.env
-    const secure = env === Env.Production
+    const env = this.apiConfigService.nodeEnv
+    const secure = env === NodeEnv.Production
     response.cookie(tokenConfig.cookieName, value, {
       httpOnly: true,
       sameSite: 'strict',
