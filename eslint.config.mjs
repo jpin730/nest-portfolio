@@ -30,7 +30,7 @@ export default defineConfig([
       '@typescript-eslint/no-floating-promises': 'warn',
       '@typescript-eslint/no-unsafe-argument': 'off',
       '@typescript-eslint/explicit-function-return-type': ['error', { allowExpressions: true }],
-      'no-console': ['error', { allow: ['info'] }],
+      'no-console': 'error',
       'no-debugger': 'error',
     },
   },
