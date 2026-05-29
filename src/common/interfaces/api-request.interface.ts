@@ -1,7 +1,7 @@
 import { Request } from 'express'
 
-import { UserDto } from '@auth/dtos/user.dto'
+import { AuthSessionDto } from '@auth/dtos/auth-session.dto'
 
 export interface ApiRequest extends Request {
-  user?: UserDto
+  authSession?: AuthSessionDto
 }

@@ -6,6 +6,7 @@ const PASSWORD_SPECIAL_CHARS = '@$!%*?&'
 
 export class UserDto {
   @Expose()
+  @Transform(trimTransform)
   @IsUUID()
   id: string
 
