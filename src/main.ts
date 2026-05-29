@@ -17,8 +17,8 @@ async function bootstrap(): Promise<void> {
 
   app.use(cookieParser(cookieSecret))
 
-  const logger = new Logger()
-  await app.listen(port, '::')
+  const logger = new Logger('Bootstrap')
+  await app.listen(port)
   logger.log(`Environment: ${nodeEnv}`)
   logger.log(`App listening on port: ${port}`)
 }
