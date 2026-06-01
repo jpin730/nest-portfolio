@@ -66,9 +66,9 @@
     "typescript-eslint": "8.59.3"
   },
   "engines": {
-    "node": "^24",
-    "pnpm": "^10 || ^11"
+    "node": "^24"
   },
+  "packageManager": "pnpm@11.5.0",
   "lint-staged": {
     "*": "prettier --write --ignore-unknown",
     "*.ts": "eslint --fix --no-warn-ignored"
