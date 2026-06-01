@@ -103,8 +103,8 @@ export class AuthService {
   }
 
   private async generateTokenPair(sub: string): Promise<[string, string]> {
-    const accessToken = await this.jwtService.sign(sub, '5minutes')
-    const refreshToken = await this.jwtService.sign(sub, '1day')
+    const accessToken = await this.jwtService.sign(sub, '5 minutes')
+    const refreshToken = await this.jwtService.sign(sub, '30 minutes')
     return [accessToken, refreshToken]
   }
 
