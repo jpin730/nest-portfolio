@@ -1,6 +1,6 @@
 # NestJS Portfolio API
 
-Backend API for a portfolio website built with NestJS. It includes features such as JWT authentication with cookies HTTP only implementation from scratch, TypeORM for database management, PostgreSQL as the database, and Cloudinary for image storage. The API allows users to manage their profile information, projects, and certificate gallery.
+Backend API for a portfolio website built with NestJS. It includes features such as JWT authentication with asymmetric encryption implementation from scratch, TypeORM for database management, PostgreSQL as the database, and Cloudinary for image storage. The API allows users to manage their profile information, projects, and certificate gallery.
 
 ## Project setup
 
