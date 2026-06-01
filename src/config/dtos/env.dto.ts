@@ -1,5 +1,14 @@
 import { Expose, Transform } from 'class-transformer'
-import { IsEnum, IsHexadecimal, IsInt, Length, Max, Min } from 'class-validator'
+import {
+  IsBase64,
+  IsEnum,
+  IsHexadecimal,
+  IsInt,
+  IsNotEmpty,
+  Length,
+  Max,
+  Min,
+} from 'class-validator'
 
 import { numberTransform } from '@common/transforms/number.transform'
 import { trimTransform } from '@common/transforms/trim.transform'
@@ -10,9 +19,15 @@ import { DatabaseEnvDto } from './database-env.dto'
 export class EnvDto extends DatabaseEnvDto {
   @Expose()
   @Transform(trimTransform)
-  @IsHexadecimal()
-  @Length(64)
-  AUTH_JWT_SECRET: string
+  @IsBase64()
+  @IsNotEmpty()
+  AUTH_JWT_PRIVATE_KEY: string
+
+  @Expose()
+  @Transform(trimTransform)
+  @IsBase64()
+  @IsNotEmpty()
+  AUTH_JWT_PUBLIC_KEY: string
 
   @Expose()
   @Transform(numberTransform)

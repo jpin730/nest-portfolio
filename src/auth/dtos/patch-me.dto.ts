@@ -1,5 +1,5 @@
 import { PartialType, PickType } from '@nestjs/mapped-types'
 
-import { UserDto } from './user.dto'
+import { RegisterDto } from './register.dto'
 
-export class PatchMeDto extends PartialType(PickType(UserDto, ['password'])) {}
+export class PatchMeDto extends PartialType(PickType(RegisterDto, ['password'])) {}

@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
-import { JwtService } from '@nestjs/jwt'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { compare, hash } from 'bcrypt'
 import { DataSource, LessThan, MoreThan } from 'typeorm'
@@ -11,7 +10,6 @@ import { RefreshTokenEntity } from '@database/entities/refresh-token.entity'
 import { UserEntity } from '@database/entities/user.entity'
 
 import { AUTH_ERROR_MESSAGE } from '../consts/auth-error-message.const'
-import { TOKEN_CONFIG, TokenConfig } from '../consts/token-config.const'
 import { AuthSessionDto } from '../dtos/auth-session.dto'
 import { LoginResultDto } from '../dtos/login-result.dto'
 import { LoginDto } from '../dtos/login.dto'
@@ -19,6 +17,7 @@ import { PatchMeDto } from '../dtos/patch-me.dto'
 import { RegisterDto } from '../dtos/register.dto'
 import { TokenPayloadDto } from '../dtos/token-payload.dto'
 import { hashToken } from '../utils/hash-token.util'
+import { JwtService } from './jwt.service'
 
 @Injectable()
 export class AuthService {
@@ -54,7 +53,7 @@ export class AuthService {
       throw new UnauthorizedException(AUTH_ERROR_MESSAGE.INVALID_CREDENTIALS)
     }
 
-    const [accessToken, refreshToken] = await this.generateTokenPair({ sub: user.id })
+    const [accessToken, refreshToken] = await this.generateTokenPair(user.id)
     await this.storeRefreshToken(refreshToken)
     return validatePlanToInstance(LoginResultDto, { accessToken, refreshToken })
   }
@@ -64,7 +63,7 @@ export class AuthService {
     user: { id: userId },
   }: AuthSessionDto): Promise<LoginResultDto> {
     const { id } = await this.getStoredRefreshToken(oldRefreshToken, userId)
-    const [accessToken, refreshToken] = await this.generateTokenPair({ sub: userId })
+    const [accessToken, refreshToken] = await this.generateTokenPair(userId)
     await this.storeRefreshToken(refreshToken, id)
     return validatePlanToInstance(LoginResultDto, { accessToken, refreshToken })
   }
@@ -77,8 +76,7 @@ export class AuthService {
   }
 
   async validateToken(token: string): Promise<AuthSessionDto> {
-    const secret = this.configService.authJwtSecret
-    const rawPayload = await this.jwtService.verifyAsync<object>(token, { secret })
+    const rawPayload = await this.jwtService.verifyAsync(token)
     const { sub: id } = validatePlanToInstance(TokenPayloadDto, rawPayload)
     const user = await this.dataSource.manager.findOne(UserEntity, { where: { id } })
     if (!user) {
@@ -104,22 +102,10 @@ export class AuthService {
     return hash(password, saltRounds)
   }
 
-  private async generateTokenPair(
-    payload: Pick<TokenPayloadDto, 'sub'>,
-  ): Promise<[string, string]> {
-    const accessToken = await this.generateToken(payload, TOKEN_CONFIG.ACCESS_TOKEN)
-    const refreshToken = await this.generateToken(payload, TOKEN_CONFIG.REFRESH_TOKEN)
+  private async generateTokenPair(sub: string): Promise<[string, string]> {
+    const accessToken = await this.jwtService.sign(sub, '5minutes')
+    const refreshToken = await this.jwtService.sign(sub, '1day')
     return [accessToken, refreshToken]
-  }
-
-  private async generateToken(
-    payload: Pick<TokenPayloadDto, 'sub'>,
-    tokenConfig: TokenConfig,
-  ): Promise<string> {
-    // TODO: use asymmetric signing
-    const secret = this.configService.authJwtSecret
-    const expiresIn = tokenConfig.expirationMin * 60
-    return this.jwtService.signAsync(payload, { secret, expiresIn })
   }
 
   private async getStoredRefreshToken(
@@ -140,14 +126,15 @@ export class AuthService {
   }
 
   private async storeRefreshToken(token: string, oldTokenId?: string): Promise<void> {
-    const rawPayload = this.jwtService.decode<unknown>(token)
+    const rawPayload = this.jwtService.decode(token)
     const { sub: userId, exp } = validatePlanToInstance(TokenPayloadDto, rawPayload)
     const tokenHash = hashToken(token)
+    const expiresAt = new Date(exp * 1000)
     await this.dataSource.transaction(async (entityManager) => {
       const refreshToken = entityManager.create(RefreshTokenEntity, {
         userId,
         tokenHash,
-        expiresAt: new Date(exp * 1000),
+        expiresAt,
       })
       await entityManager.save(refreshToken)
       if (oldTokenId) {

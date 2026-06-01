@@ -9,8 +9,12 @@ import { NodeEnv } from '../enums/node-env.enum'
 export class ConfigService {
   constructor(private readonly configService: NestConfigService<EnvDto, true>) {}
 
-  get authJwtSecret(): string {
-    return this.configService.get('AUTH_JWT_SECRET', { infer: true })
+  get authJwtPrivateKey(): string {
+    return this.configService.get('AUTH_JWT_PRIVATE_KEY', { infer: true })
+  }
+
+  get authJwtPublicKey(): string {
+    return this.configService.get('AUTH_JWT_PUBLIC_KEY', { infer: true })
   }
 
   get authSaltRounds(): number {

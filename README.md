@@ -46,10 +46,6 @@ For security reasons, scripts are ignored on install. For setting up Husky, run 
 pnpm prepare
 ```
 
-## Secrets
+## Secrets and Key Pair
 
-For JWT and cookies, generate the secrets using:
-
-```bash
-openssl rand -hex 32
-```
+For cookies secret and JWT key pair, make sure the `.env` file is present and has the required environment variables specified in `.env.template`. Then run the `generate-secrets.sh` script to generate the secrets and key pair. Execution permissions may be required: `chmod +x generate-secrets.sh`.
