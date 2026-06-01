@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
+import { ConfigService as NestConfigService } from '@nestjs/config'
 
 import { EnvsDto } from '../dtos/envs.dto'
 import { NodeEnv } from '../enums/node-env.enum'
@@ -13,8 +13,8 @@ interface Database {
 }
 
 @Injectable()
-export class ApiConfigService {
-  constructor(private readonly configService: ConfigService<EnvsDto, true>) {}
+export class ConfigService {
+  constructor(private readonly configService: NestConfigService<EnvsDto, true>) {}
 
   get authJwtSecret(): string {
     return this.configService.get('AUTH_JWT_SECRET', { infer: true })

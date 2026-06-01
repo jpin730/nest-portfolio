@@ -4,9 +4,9 @@ import { Cron, CronExpression } from '@nestjs/schedule'
 import { compare, hash } from 'bcrypt'
 import { DataSource, LessThan, MoreThan } from 'typeorm'
 
-import { ApiConfigService } from '@api-config/services/api-config.service'
 import { ERROR_MESSAGE } from '@common/consts/error-message.const'
 import { validatePlanToInstance } from '@common/utils/validate-plan-to-instance.util'
+import { ConfigService } from '@config/services/config.service'
 import { RefreshTokenEntity } from '@database/entities/refresh-token.entity'
 import { UserEntity } from '@database/entities/user.entity'
 
@@ -25,7 +25,7 @@ export class AuthService {
   private readonly logger = new Logger(AuthService.name)
 
   constructor(
-    private readonly apiConfigService: ApiConfigService,
+    private readonly configService: ConfigService,
     private readonly dataSource: DataSource,
     private readonly jwtService: JwtService,
   ) {}
@@ -77,7 +77,7 @@ export class AuthService {
   }
 
   async validateToken(token: string): Promise<AuthSessionDto> {
-    const secret = this.apiConfigService.authJwtSecret
+    const secret = this.configService.authJwtSecret
     const rawPayload = await this.jwtService.verifyAsync<object>(token, { secret })
     const { sub: id } = validatePlanToInstance(TokenPayloadDto, rawPayload)
     const user = await this.dataSource.manager.findOne(UserEntity, { where: { id } })
@@ -100,7 +100,7 @@ export class AuthService {
   }
 
   private async hashPassword(password: string): Promise<string> {
-    const saltRounds = this.apiConfigService.authSaltRounds
+    const saltRounds = this.configService.authSaltRounds
     return hash(password, saltRounds)
   }
 
@@ -117,7 +117,7 @@ export class AuthService {
     tokenConfig: TokenConfig,
   ): Promise<string> {
     // TODO: use asymmetric signing
-    const secret = this.apiConfigService.authJwtSecret
+    const secret = this.configService.authJwtSecret
     const expiresIn = tokenConfig.expirationMin * 60
     return this.jwtService.signAsync(payload, { secret, expiresIn })
   }
@@ -162,7 +162,9 @@ export class AuthService {
       const { affected } = await entityManager.delete(RefreshTokenEntity, {
         expiresAt: LessThan(new Date()),
       })
-      this.logger.log(`Cleaned up ${affected} expired refresh tokens`)
+      if (affected && affected > 0) {
+        this.logger.log(`Cleaned up ${affected} expired refresh tokens`)
+      }
     })
   }
 }

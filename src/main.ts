@@ -1,22 +1,23 @@
+import { Logger } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
+import cookieParser from 'cookie-parser'
 import morgan from 'morgan'
 
-import { ApiConfigService } from '@api-config/services/api-config.service'
+import { ConfigService } from '@config/services/config.service'
 
-import { Logger } from '@nestjs/common'
-import cookieParser from 'cookie-parser'
 import { AppModule } from './app.module'
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule)
 
-  const apiConfigService = app.get(ApiConfigService)
-  const { cookieSecret, port, nodeEnv } = apiConfigService
+  // Configuration
+  const { cookieSecret, port, nodeEnv } = app.get(ConfigService)
 
+  // Middlewares
   app.use(morgan('tiny'))
-
   app.use(cookieParser(cookieSecret))
 
+  // Initialization
   const logger = new Logger('Bootstrap')
   await app.listen(port)
   logger.log(`Environment: ${nodeEnv}`)

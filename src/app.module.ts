@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common'
 import { ScheduleModule } from '@nestjs/schedule'
 
-import { ApiConfigModule } from '@api-config/api-config.module'
+import { ConfigModule } from '@config/config.module'
 import { DatabaseModule } from '@database/database.module'
 
 import { AuthModule } from '@auth/auth.module'
@@ -14,7 +14,7 @@ import { VALIDATION_PIPE_PROVIDER } from '@common/providers/validation-pipe.prov
 
 @Module({
   imports: [
-    ApiConfigModule,
+    ConfigModule,
     DatabaseModule,
     ScheduleModule.forRoot(),
 

@@ -22,7 +22,7 @@
     "strictBindCallApply": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "@api-config/*": ["./src/api-config/*"],
+      "@config/*": ["src/config/*"],
       "@auth/*": ["./src/auth/*"],
       "@common/*": ["./src/common/*"],
       "@database/*": ["./src/database/*"],
