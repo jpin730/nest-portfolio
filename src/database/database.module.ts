@@ -2,19 +2,19 @@ import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
 import { ConfigModule } from '@config/config.module'
+import { NodeEnv } from '@config/enums/node-env.enum'
 import { ConfigService } from '@config/services/config.service'
-import { NodeEnv } from 'src/config/enums/node-env.enum'
-
-import { DATA_SOURCE_OPTIONS } from './consts/data-source.const'
+import { getDataSource } from './utils/get-data-source.util'
 
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
-        const env = configService.nodeEnv
-        const logging = env !== NodeEnv.Production
-        return { ...DATA_SOURCE_OPTIONS, logging }
+        const { databaseEnv, nodeEnv } = configService
+        const dataSourceOptions = getDataSource(databaseEnv)
+        const logging = nodeEnv !== NodeEnv.Production
+        return { ...dataSourceOptions, logging }
       },
       inject: [ConfigService],
     }),

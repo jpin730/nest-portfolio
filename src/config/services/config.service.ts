@@ -1,20 +1,13 @@
 import { Injectable } from '@nestjs/common'
 import { ConfigService as NestConfigService } from '@nestjs/config'
 
-import { EnvsDto } from '../dtos/envs.dto'
+import { DatabaseEnvDto } from '../dtos/database-env.dto'
+import { EnvDto } from '../dtos/env.dto'
 import { NodeEnv } from '../enums/node-env.enum'
-
-interface Database {
-  host: string
-  port: number
-  database: string
-  username: string
-  password: string
-}
 
 @Injectable()
 export class ConfigService {
-  constructor(private readonly configService: NestConfigService<EnvsDto, true>) {}
+  constructor(private readonly configService: NestConfigService<EnvDto, true>) {}
 
   get authJwtSecret(): string {
     return this.configService.get('AUTH_JWT_SECRET', { infer: true })
@@ -28,13 +21,13 @@ export class ConfigService {
     return this.configService.get('COOKIE_SECRET', { infer: true })
   }
 
-  get database(): Database {
-    const host = this.configService.get('DB_HOST', { infer: true })
-    const port = this.configService.get('DB_PORT', { infer: true })
-    const database = this.configService.get('DB_NAME', { infer: true })
-    const username = this.configService.get('DB_USER', { infer: true })
-    const password = this.configService.get('DB_PASS', { infer: true })
-    return { host, port, database, username, password }
+  get databaseEnv(): DatabaseEnvDto {
+    const DB_HOST = this.configService.get('DB_HOST', { infer: true })
+    const DB_PORT = this.configService.get('DB_PORT', { infer: true })
+    const DB_NAME = this.configService.get('DB_NAME', { infer: true })
+    const DB_USER = this.configService.get('DB_USER', { infer: true })
+    const DB_PASS = this.configService.get('DB_PASS', { infer: true })
+    return { DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS }
   }
 
   get nodeEnv(): NodeEnv {

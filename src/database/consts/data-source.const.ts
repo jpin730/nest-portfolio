@@ -1,28 +1,17 @@
 import { config } from 'dotenv'
-import { DataSource, DataSourceOptions } from 'typeorm'
-import { SnakeNamingStrategy } from 'typeorm-naming-strategies'
+import { DataSource } from 'typeorm'
 
-import { validateEnvs, validateMigrationEnvs } from 'src/config/utils/validate-envs.util'
+import { validateMigrationEnvs } from '@config/utils/validate-migration-env'
+
+import { getDataSource } from '../utils/get-data-source.util'
 
 config()
 
-const isMigration = process.env.MIGRATION === 'true'
-const env = isMigration ? validateMigrationEnvs(process.env) : validateEnvs(process.env)
+const databaseEnv = validateMigrationEnvs(process.env)
+const dataSourceOptions = getDataSource(databaseEnv)
 
-// TODO: create factory function
-export const DATA_SOURCE_OPTIONS: DataSourceOptions = {
-  type: 'postgres',
-  host: env.DB_HOST,
-  port: env.DB_PORT,
-  username: env.DB_USER,
-  password: env.DB_PASS,
-  database: env.DB_NAME,
-  ssl: { rejectUnauthorized: false },
-  synchronize: false,
-  entities: [__dirname + '/../entities/*.entity.{ts,js}'],
+export const DATA_SOURCE = new DataSource({
+  ...dataSourceOptions,
   migrations: [__dirname + '/../migrations/*.ts'],
-  namingStrategy: new SnakeNamingStrategy(),
   logging: true,
-}
-
-export const DATA_SOURCE = new DataSource(DATA_SOURCE_OPTIONS)
+})
