@@ -7,6 +7,7 @@ import {
   Logger,
 } from '@nestjs/common'
 import { HttpAdapterHost } from '@nestjs/core'
+import { JOSEError } from 'jose/errors'
 import { TypeORMError } from 'typeorm'
 
 import { ApiResponse } from '../interfaces/api-response.interface'
@@ -33,6 +34,10 @@ export class GlobalExceptionFilter implements ExceptionFilter<unknown> {
   }
 
   private getStatusCode(exception: unknown): number {
+    if (exception instanceof JOSEError) {
+      return HttpStatus.UNAUTHORIZED
+    }
+
     if (exception instanceof HttpException) {
       return exception.getStatus()
     }
@@ -50,7 +55,7 @@ export class GlobalExceptionFilter implements ExceptionFilter<unknown> {
       'detail' in exception &&
       typeof exception.detail === 'string'
     ) {
-      throw new Error(exception.detail)
+      return exception.detail
     }
 
     if (exception instanceof HttpException) {
