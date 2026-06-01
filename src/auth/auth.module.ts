@@ -7,5 +7,6 @@ import { JwtService } from './services/jwt.service'
 @Module({
   controllers: [AuthController],
   providers: [AuthService, JwtService],
+  exports: [AuthService],
 })
 export class AuthModule {}

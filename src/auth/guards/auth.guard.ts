@@ -3,15 +3,27 @@ import { isJWT } from 'class-validator'
 
 import { ApiRequest } from '@common/interfaces/api-request.interface'
 
+import { Public } from '@auth/decorators/public.decorator'
+import { Reflector } from '@nestjs/core'
 import { AUTH_ERROR_MESSAGE } from '../consts/auth-error-message.const'
 import { AuthService } from '../services/auth.service'
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly reflector: Reflector,
+    private readonly authService: AuthService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    // TODO: add logic for public routes
+    const isPublic = this.reflector.getAllAndOverride<true | void>(Public, [
+      context.getHandler(),
+      context.getClass(),
+    ])
+    if (isPublic) {
+      return true
+    }
+
     const request = context.switchToHttp().getRequest<ApiRequest>()
     const token = request.headers.authorization?.match(/^Bearer (.+)$/)?.at(1)
     if (!token || typeof token !== 'string' || !isJWT(token)) {
