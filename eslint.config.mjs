@@ -26,10 +26,11 @@ export default defineConfig([
   },
   {
     rules: {
+      '@typescript-eslint/explicit-function-return-type': ['error', { allowExpressions: true }],
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-floating-promises': 'warn',
       '@typescript-eslint/no-unsafe-argument': 'off',
-      '@typescript-eslint/explicit-function-return-type': ['error', { allowExpressions: true }],
+      '@typescript-eslint/return-await': 'error',
       'no-console': 'error',
       'no-debugger': 'error',
     },
