@@ -4,6 +4,7 @@ import { compare, hash } from 'bcrypt'
 import { DataSource, LessThan, MoreThan } from 'typeorm'
 
 import { ERROR_MESSAGE } from '@common/consts/error-message.const'
+import { getErrorMessage } from '@common/utils/get-error-message.util'
 import { validatePlanToInstance } from '@common/utils/validate-plan-to-instance.util'
 import { ConfigService } from '@config/services/config.service'
 import { RefreshTokenEntity } from '@database/entities/refresh-token.entity'
@@ -34,7 +35,6 @@ export class AuthService {
     if (existingUser) {
       throw new BadRequestException(AUTH_ERROR_MESSAGE.EMAIL_ALREADY_EXISTS)
     }
-
     const hashedPassword = await this.hashPassword(password)
     await this.dataSource.transaction(async (entityManager) => {
       const user = entityManager.create(UserEntity, { email, password: hashedPassword })
@@ -47,12 +47,10 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException(AUTH_ERROR_MESSAGE.INVALID_CREDENTIALS)
     }
-
     const isPasswordValid = await compare(password, user.password)
     if (!isPasswordValid) {
       throw new UnauthorizedException(AUTH_ERROR_MESSAGE.INVALID_CREDENTIALS)
     }
-
     const [accessToken, refreshToken] = await this.generateTokenPair(user.id)
     await this.storeRefreshToken(refreshToken)
     return validatePlanToInstance(LoginResultDto, { accessToken, refreshToken })
@@ -75,16 +73,6 @@ export class AuthService {
     })
   }
 
-  async validateToken(token: string): Promise<AuthSessionDto> {
-    const rawPayload = await this.jwtService.verifyAsync(token)
-    const { sub: id } = validatePlanToInstance(TokenPayloadDto, rawPayload)
-    const user = await this.dataSource.manager.findOne(UserEntity, { where: { id } })
-    if (!user) {
-      throw new UnauthorizedException(AUTH_ERROR_MESSAGE.INVALID_CREDENTIALS)
-    }
-    return validatePlanToInstance(AuthSessionDto, { token, user })
-  }
-
   async patchUser(id: string, patchMeDto: PatchMeDto): Promise<void> {
     if (Object.keys(patchMeDto).length === 0) {
       throw new BadRequestException(ERROR_MESSAGE.NO_FIELDS_TO_UPDATE)
@@ -95,6 +83,16 @@ export class AuthService {
     await this.dataSource.transaction(async (entityManager) => {
       await entityManager.update(UserEntity, { id }, patchMeDto)
     })
+  }
+
+  async validateToken(token: string): Promise<AuthSessionDto> {
+    const rawPayload = await this.jwtService.verifyAsync(token)
+    const { sub: id } = validatePlanToInstance(TokenPayloadDto, rawPayload)
+    const user = await this.dataSource.manager.findOne(UserEntity, { where: { id } })
+    if (!user) {
+      throw new UnauthorizedException(AUTH_ERROR_MESSAGE.INVALID_CREDENTIALS)
+    }
+    return validatePlanToInstance(AuthSessionDto, { token, user })
   }
 
   private async hashPassword(password: string): Promise<string> {
@@ -145,13 +143,18 @@ export class AuthService {
 
   @Cron(CronExpression.EVERY_HOUR)
   async cleanupExpiredTokens(): Promise<void> {
-    await this.dataSource.transaction(async (entityManager) => {
-      const { affected } = await entityManager.delete(RefreshTokenEntity, {
-        expiresAt: LessThan(new Date()),
+    try {
+      await this.dataSource.transaction(async (entityManager) => {
+        const { affected } = await entityManager.delete(RefreshTokenEntity, {
+          expiresAt: LessThan(new Date()),
+        })
+        if (affected && affected > 0) {
+          this.logger.log(`Cleaned up ${affected} expired refresh tokens`)
+        }
       })
-      if (affected && affected > 0) {
-        this.logger.log(`Cleaned up ${affected} expired refresh tokens`)
-      }
-    })
+    } catch (error) {
+      this.logger.error(AUTH_ERROR_MESSAGE.FAILED_CLEANUP_EXPIRED_TOKENS)
+      this.logger.error(getErrorMessage(error))
+    }
   }
 }

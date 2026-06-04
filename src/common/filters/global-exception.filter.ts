@@ -7,9 +7,8 @@ import {
   Logger,
 } from '@nestjs/common'
 import { HttpAdapterHost } from '@nestjs/core'
-import { JOSEError } from 'jose/errors'
-import { TypeORMError } from 'typeorm'
 
+import { ERROR_MESSAGE } from '../consts/error-message.const'
 import { ApiResponse } from '../interfaces/api-response.interface'
 import { isStringArray } from '../utils/is-string-array.util'
 
@@ -19,72 +18,51 @@ export class GlobalExceptionFilter implements ExceptionFilter<unknown> {
 
   constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
 
-  catch(exception: unknown, host: ArgumentsHost): void {
+  catch(error: unknown, host: ArgumentsHost): void {
     const { httpAdapter } = this.httpAdapterHost
-
     const ctx = host.switchToHttp()
-
-    const statusCode = this.getStatusCode(exception)
-    const message = this.getMessage(exception)
+    const statusCode = this.getStatusCode(error)
+    const message = this.getMessage(error)
     const body: ApiResponse = { message }
-
     this.logger.error(message)
-
     httpAdapter.reply(ctx.getResponse(), body, statusCode)
   }
 
-  private getStatusCode(exception: unknown): number {
-    if (exception instanceof JOSEError) {
-      return HttpStatus.UNAUTHORIZED
-    }
-
-    if (exception instanceof HttpException) {
-      return exception.getStatus()
+  private getStatusCode(error: unknown): number {
+    if (error instanceof HttpException) {
+      return error.getStatus()
     }
     return HttpStatus.INTERNAL_SERVER_ERROR
   }
 
-  private getMessage(exception: unknown): string {
-    const isInstanceOfError = exception instanceof Error
-    if (!isInstanceOfError) {
-      return HttpStatus[HttpStatus.INTERNAL_SERVER_ERROR]
+  private getMessage(error: unknown): string {
+    const isError = error instanceof Error
+    if (!isError) {
+      return ERROR_MESSAGE.FALLBACK
     }
-
-    if (
-      exception instanceof TypeORMError &&
-      'detail' in exception &&
-      typeof exception.detail === 'string'
-    ) {
-      return exception.detail
-    }
-
-    if (exception instanceof HttpException) {
-      const response = exception.getResponse()
+    if (error instanceof HttpException) {
+      const response = error.getResponse()
       const message = this.getMessageFromResponse(response)
       if (message) {
         return message
       }
     }
-
-    return exception.message
+    return error.message
   }
 
+  // TODO: (zod validation) will be removed
   private getMessageFromResponse(response: unknown): string | null {
     const isObjectWithMessage =
       typeof response === 'object' && response !== null && 'message' in response
-
     if (!isObjectWithMessage) {
       return null
     }
-
     if (typeof response.message === 'string') {
       return response.message
     }
-
     if (isStringArray(response.message)) {
       return response.message.join(', ')
     }
-
     return null
   }
 }

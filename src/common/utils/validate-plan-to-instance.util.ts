@@ -1,6 +1,7 @@
 import { ClassConstructor, plainToInstance } from 'class-transformer'
 import { validateSync } from 'class-validator'
 
+// TODO: evaluate how to handle this errors
 export const validatePlanToInstance = <T extends object>(
   classType: ClassConstructor<T>,
   planObject: unknown,
